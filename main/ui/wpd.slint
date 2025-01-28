@@ -1,0 +1,205 @@
+import { Slider, Button } from "std-widgets.slint";
+import { WpdSlider} from "wpd-slider.slint";
+
+export component Bubble inherits Rectangle {
+    in property<int> radius;
+
+    Rectangle {
+        width: radius * 2.0 * 1px;
+        height: radius * 2.0 * 1px;
+        border-radius: self.width/2;
+        background: blue;
+    }
+}
+
+component layer inherits Rectangle {
+    in property <[{radius: int, x: int, y: int}]> model;
+
+    for cur-bubble in model: Rectangle {
+        Bubble {
+            radius: cur-bubble.radius;
+            x: /*(root.width / 2)*/ + cur-bubble.x * 1px;
+            y: /*(root.height / 2)*/ + cur-bubble.y * 1px;
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    width: 600px;
+    height: 1024px;
+    background: black;
+    no-frame: true;
+
+    property <[{radius: int, x: int, y: int}]> model_layer0: [
+        {radius: 30, y: -25, x: 300 },
+        {radius: 30, y: -25, x: 200 },
+        {radius: 30, y: -25, x: 100 },
+        {radius: 30, y: -25, x: 0 },
+        {radius: 30, y: -25, x: -100 },
+        {radius: 30, y: -25, x: -200 },
+        {radius: 30, y: -25, x: -300 },
+
+        {radius: 30, y: 25, x: 300 },
+        {radius: 30, y: 25, x: 200 },
+        {radius: 30, y: 25, x: 100 },
+        {radius: 30, y: 25, x: 0 },
+        {radius: 30, y: 25, x: -100 },
+        {radius: 30, y: 25, x: -200 },
+        {radius: 30, y: 25, x: -300 },
+    ];
+
+    property <[{radius: int, x: int, y: int}]> model_layer1: [
+        {radius: 30, y: -25, x: 300 },
+        {radius: 30, y: -25, x: 250 },
+        {radius: 30, y: -25, x: 200 },
+        {radius: 30, y: -25, x: 150 },
+        {radius: 30, y: -25, x: 100 },
+        {radius: 30, y: -25, x: 50 },
+        {radius: 30, y: -25, x: 0 },
+        {radius: 30, y: -25, x: -50 },
+        {radius: 30, y: -25, x: -100 },
+        {radius: 30, y: -25, x: -150 },
+        {radius: 30, y: -25, x: -200 },
+        {radius: 30, y: -25, x: -250 },
+        {radius: 30, y: -25, x: -300 },
+
+        {radius: 30, y: 25, x: 300 },
+        {radius: 30, y: 25, x: 250 },
+        {radius: 30, y: 25, x: 200 },
+        {radius: 30, y: 25, x: 150 },
+        {radius: 30, y: 25, x: 100 },
+        {radius: 30, y: 25, x: 50 },
+        {radius: 30, y: 25, x: 0 },
+        {radius: 30, y: 25, x: -50 },
+        {radius: 30, y: 25, x: -100 },
+        {radius: 30, y: 25, x: -150 },
+        {radius: 30, y: 25, x: -200 },
+        {radius: 30, y: 25, x: -250 },
+        {radius: 30, y: 25, x: -300 },
+    ];
+    property <[{radius: int, x: int, y: int}]> model_layer2: [
+        {radius: 25, y: -25, x: 300 },
+        {radius: 25, y: -25, x: 250 },
+        {radius: 25, y: -25, x: 200 },
+        {radius: 25, y: -25, x: 150 },
+        {radius: 25, y: -25, x: 100 },
+        {radius: 25, y: -25, x: 50 },
+        {radius: 25, y: -25, x: 0 },
+        {radius: 25, y: -25, x: -50 },
+        {radius: 25, y: -25, x: -100 },
+        {radius: 25, y: -25, x: -150 },
+        {radius: 25, y: -25, x: -200 },
+        {radius: 25, y: -25, x: -250 },
+        {radius: 25, y: -25, x: -300 },
+
+        {radius: 25, y: 25, x: 300 },
+        {radius: 25, y: 25, x: 250 },
+        {radius: 25, y: 25, x: 200 },
+        {radius: 25, y: 25, x: 150 },
+        {radius: 25, y: 25, x: 100 },
+        {radius: 25, y: 25, x: 50 },
+        {radius: 25, y: 25, x: 0 },
+        {radius: 25, y: 25, x: -50 },
+        {radius: 25, y: 25, x: -100 },
+        {radius: 25, y: 25, x: -150 },
+        {radius: 25, y: 25, x: -200 },
+        {radius: 25, y: 25, x: -250 },
+        {radius: 25, y: 25, x: -300 },
+    ];
+
+    property <[{radius: int, x: int, y: int}]> model_layer3: [
+        {radius: 15, y: 0, x: 300 },
+        {radius: 15, y: 0, x: 250 },
+        {radius: 15, y: 0, x: 200 },
+        {radius: 15, y: 0, x: 150 },
+        {radius: 15, y: 0, x: 100 },
+        {radius: 15, y: 0, x: 50 },
+        {radius: 15, y: 0, x: 0 },
+        {radius: 15, y: 0, x: -50 },
+        {radius: 15, y: 0, x: -100 },
+        {radius: 15, y: 0, x: -150 },
+        {radius: 15, y: 0, x: -200 },
+        {radius: 15, y: 0, x: -250 },
+        {radius: 15, y: 0, x: -300 },
+
+        {radius: 15, y: 50, x: 300 },
+        {radius: 15, y: 50, x: 250 },
+        {radius: 15, y: 50, x: 200 },
+        {radius: 15, y: 50, x: 150 },
+        {radius: 15, y: 50, x: 100 },
+        {radius: 15, y: 50, x: 50 },
+        {radius: 15, y: 50, x: 0 },
+        {radius: 15, y: 50, x: -50 },
+        {radius: 15, y: 50, x: -100 },
+        {radius: 15, y: 50, x: -150 },
+        {radius: 15, y: 50, x: -200 },
+        {radius: 15, y: 50, x: -250 },
+        {radius: 15, y: 50, x: -300 },
+
+        {radius: 15, y: -50, x: 300 },
+        {radius: 15, y: -50, x: 250 },
+        {radius: 15, y: -50, x: 200 },
+        {radius: 15, y: -50, x: 150 },
+        {radius: 15, y: -50, x: 100 },
+        {radius: 15, y: -50, x: 50 },
+        {radius: 15, y: -50, x: 0 },
+        {radius: 15, y: -50, x: -50 },
+        {radius: 15, y: -50, x: -100 },
+        {radius: 15, y: -50, x: -150 },
+        {radius: 15, y: -50, x: -200 },
+        {radius: 15, y: -50, x: -250 },
+        {radius: 15, y: -50, x: -300 },
+    ];
+
+    layer {
+        model: model_layer0;
+        //background: white;
+        width: root.width;
+        height:100px;
+        y: root.height - self.height;
+    }
+
+    layer1 := layer {
+        model: model_layer1;
+        //background: red;
+        width: root.width;
+        height:150px;
+        y: root.height - self.height - 100px;
+    }
+
+    layer2 := layer {
+        model: model_layer2;
+        //background: yellow;
+        width: root.width;
+        height:200px;
+        y: root.height - self.height - 250px;
+    }
+
+    layer3 := layer {
+        property<int> init-y;
+
+        model: model_layer3;
+        //background: green;
+        width: root.width;
+        height: 200px;
+        y: root.height - self.height - 450px;
+
+    }
+
+    WpdSlider {
+        width: parent.height * 0.5;
+        height: parent.height * 0.5;
+        maximum: 100;
+        minimum: 0;
+        value-x: 50;
+        value-y: 50;
+
+        y-changed(y) => {
+            layer3.y =  root.height - layer3.height - 650px + 4px*y + 1px/50*y*(y*1-50);
+            layer2.y = root.height - layer2.height - 250px + 2px*y;
+            layer1.y = root.height - layer1.height - 50px + 1px*y;
+            debug(y);
+        }
+    }
+
+}

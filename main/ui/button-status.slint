@@ -1,0 +1,59 @@
+import { GridBox } from "std-widgets.slint";
+
+export component buttonStatus inherits Rectangle {
+    in property <int> id;
+    in property <string> name;
+    in-out property <[{pressed: bool, duration: int, counter: int}]> buttonStatus;
+    in property <bool> enabled: true;
+
+    height: 60px;
+    width: 80px;
+    background: lightgray;
+    border-radius: 5px;
+
+    VerticalLayout {
+        alignment: center;
+
+        GridBox {
+            spacing: 2px;
+            Row {
+                HorizontalLayout {
+                    colspan: 2;
+                    alignment: center;
+                    Text {
+                        font-weight: 900;
+                        text: root.name;
+                    }
+                }
+            }
+
+            Row {
+                Rectangle {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: self.width / 2;
+                    background: root.buttonStatus[root.id].pressed ? green : gray;
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    Text {
+                        text: root.buttonStatus[root.id].duration + " ms";
+                    }
+                }
+            }
+
+            Row {
+                HorizontalLayout {
+
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    Text {
+                        text: root.buttonStatus[root.id].counter;
+                    }
+                }
+            }
+        }
+    }
+}

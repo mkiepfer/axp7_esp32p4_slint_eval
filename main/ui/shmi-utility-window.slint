@@ -1,0 +1,652 @@
+import { Button, GridBox, GroupBox, VerticalBox, AboutSlint, CheckBox, HorizontalBox, LineEdit, TextEdit, ComboBox, Slider, TabWidget } from "std-widgets.slint";
+import { buttonStatus } from "button_status.slint";
+import { LedSequnce } from "led_sequence.slint";
+
+export component ShmiUtilityWindow inherits Window {
+    title: "SHMI Utility";
+    icon: @image-url("hmi_logo.png");
+
+    in-out property <bool> connected: false;
+    in-out property <bool> opened: false;
+
+    in-out property <string> PartNumber: "-";
+    in-out property <string> SerialNumber: "-";
+    in-out property <string> PCBASerNo: "-";
+    in-out property <string> HWVersion: "-";
+    in-out property <string> FWVersion: "-";
+    in-out property <string> SuppplierUid: "-";
+    in-out property <string> ManuDate: "-";
+    in-out property <string> Manufacturer: "-";
+    in-out property <string> PcbaSwParamVersion: "-";
+    in-out property <string> hmiProtocolVersion: "-";
+
+    in-out property <string> DeviceStatus: "";
+    in-out property <string> Runtime: "";
+    in-out property <string> CrcErrorCounter: "";
+    in-out property <[string]> ledStats: ["", "", "", "", "", "", "", "", ""];
+
+    in-out property <string> FeatureMask: "";
+
+    in property <string> Version: "";
+    in property <string> ProtocolVersion: "-";
+    in property <string> Author: "";
+    in property <string> AppPartNo: "";
+
+
+    in-out property <bool> enableBottomButton: false;
+    in-out property <bool> enableBottomButtonRedundance: false;
+    in-out property <bool> enableSouthButtonRedundance: false;
+
+    private property <bool> ledAutoUpdate: false;
+    callback resetConnection();
+    callback ledsChanged();
+    callback openPort(string, string);
+
+    public function clearPendingFlag(id: int) {
+        root.ledStatus[id].updatePending = false;
+    }
+
+    public function setBtnStatus(id: int, pressed: bool, durationMs: int, counter: int) {
+        root.btnStatus[id].pressed = pressed;
+        root.btnStatus[id].duration = durationMs;
+        root.btnStatus[id].counter = counter;
+    }
+
+    public function setBtnCounter(id: int, counter: int) {
+        root.btnStatus[id].counter = counter;
+    }
+
+    in-out property <[{sequence: int, updatePending: bool, rgbcolor: color}]> ledStatus: [
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black },
+        { sequence: 0, updatePending: false, rgbcolor: Colors.black }
+    ];
+
+    in-out property <[{pressed: bool, duration: int, counter: int}]> btnStatus: [
+        { pressed: false, duration: 0, counter: 0 },
+        { pressed: false, duration: 0, counter: 0 },
+        { pressed: false, duration: 0, counter: 0 },
+        { pressed: false, duration: 0, counter: 0 },
+        { pressed: false, duration: 0, counter: 0 }
+    ];
+
+    in property <[string]> comPorts:["---"];
+    in property <[string]> baudRates:["9600", "19200", "28800", "38400", "57600", "76800", "115200"];
+
+    in property <string> curComPort <=> comport.current-value;
+    in property <string> curComBaudrate <=> combaudrate.current-value;
+
+    function ledChangedInternal() {
+        if (root.ledAutoUpdate) {
+            root.ledsChanged();
+        }
+    }
+
+    TabWidget {
+        Tab {
+            title: "Control";
+            VerticalBox {
+                spacing: 0px;
+                GroupBox {
+                    HorizontalBox {
+                        padding: 0px;
+
+                        HorizontalBox {
+                            height: 50px;
+                            Rectangle {
+                                width: 20px;
+                                height: 20px;
+                                background: root.connected ? green : red;
+                                border-width: 1px;
+                                border-color: gray;
+                                border-radius: self.width / 2;
+                            }
+
+                            comport := ComboBox {
+                                model: comPorts;
+                                enabled: !root.opened;
+                            }
+
+                            combaudrate := ComboBox {
+                                model: baudRates;
+                                enabled: !root.opened;
+                            }
+
+                            Button {
+                                text: root.opened ? "close" : "open";
+                                clicked => {
+                                    root.openPort(root.curComPort, root.curComBaudrate);
+                                }
+                            }
+
+                            Button {
+                                text: "Update LEDs";
+                                enabled: !root.ledAutoUpdate;
+                                clicked => {
+                                    root.ledsChanged();
+                                }
+                            }
+                        }
+
+                        VerticalBox {
+                            CheckBox {
+                                text: "Enable bottom button";
+                                checked: root.enableBottomButton;
+                                enabled: !root.opened;
+                                toggled => {
+                                    root.enableBottomButton = self.checked;
+                                }
+                            }
+
+                            CheckBox {
+                                text: "Enable bottom button redundance";
+                                checked: root.enableBottomButtonRedundance;
+                                enabled: !root.opened;
+                                toggled => {
+                                    root.enableBottomButtonRedundance = self.checked;
+                                }
+                            }
+
+                            CheckBox {
+                                text: "Enable south button redundance";
+                                checked: root.enableSouthButtonRedundance;
+                                enabled: !root.opened;
+                                toggled => {
+                                    root.enableSouthButtonRedundance = self.checked;
+                                }
+                            }
+
+                            CheckBox {
+                                text: "Autoupdate LED status";
+                                checked: root.ledAutoUpdate;
+                                visible: false;
+                                toggled => {
+                                    root.ledAutoUpdate = self.checked;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                GridLayout {
+                    spacing: 0px;
+                    Row {
+                        HorizontalLayout {
+                            alignment: center;
+                            colspan: 3;
+                            buttonStatus {
+                                name: "North";
+                                id: 0;
+                                buttonStatus <=> root.btnStatus;
+                            }
+                        }
+                    }
+
+                    Row {
+                        VerticalLayout {
+                            alignment: center;
+                            buttonStatus {
+                                name: "West";
+                                id: 3;
+                                buttonStatus <=> root.btnStatus;
+                            }
+                        }
+
+                        GridBox {
+                            Row {
+                                LedSequnce {
+                                    Id: 6;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 7;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 8;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+                            }
+
+                            Row {
+                                LedSequnce {
+                                    Id: 5;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 4;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 3;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+                            }
+
+                            Row {
+                                LedSequnce {
+                                    Id: 0;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 1;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+
+                                LedSequnce {
+                                    Id: 2;
+                                    enabled: root.connected;
+                                    ledStatus <=> root.ledStatus;
+                                    ledChanged() => {
+                                        root.ledChangedInternal();
+                                    }
+                                }
+                            }
+                        }
+
+                        VerticalLayout {
+                            alignment: center;
+                            buttonStatus {
+                                name: "East";
+                                id: 1;
+                                buttonStatus <=> root.btnStatus;
+                            }
+                        }
+                    }
+
+                    Row {
+                        HorizontalLayout {
+                            alignment: center;
+                            colspan: 3;
+                            buttonStatus {
+                                name: "South";
+                                id: 2;
+                                buttonStatus <=> root.btnStatus;
+                            }
+                        }
+                    }
+
+                    Row {
+                        HorizontalLayout {
+                            alignment: center;
+                            colspan: 3;
+                            padding-top: 5px;
+                            buttonStatus {
+                                name: "Bottom";
+                                id: 4;
+                                buttonStatus <=> root.btnStatus;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Tab {
+            title: "Status";
+            VerticalLayout {
+                alignment: start;
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 5px;
+                    GroupBox {
+                        title: "Stats";
+                        GridLayout {
+                            spacing: 4px;
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Device-Status:";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.DeviceStatus;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Device-Runtime:";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.Runtime;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "CRC-Error-Counter:";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.CrcErrorCounter;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Led-Stats:";
+                                }
+
+                                GridLayout {
+                                    spacing: 2px;
+                                    Row {
+                                        Text {
+                                            text: "D1";
+                                        }
+
+                                        Text {
+                                            text: "D2";
+                                        }
+
+                                        Text {
+                                            text: "D3";
+                                        }
+
+                                        Text {
+                                            text: "D4";
+                                        }
+
+                                        Text {
+                                            text: "D5";
+                                        }
+
+                                        Text {
+                                            text: "D6";
+                                        }
+
+                                        Text {
+                                            text: "D7";
+                                        }
+
+                                        Text {
+                                            text: "D8";
+                                        }
+
+                                        Text {
+                                            text: "D9";
+                                        }
+                                    }
+
+                                    Row {
+                                        Text {
+                                            text: root.ledStats[0];
+                                        }
+                                        Text {
+                                            text: root.ledStats[1];
+                                        }
+                                        Text {
+                                            text: root.ledStats[2];
+                                        }
+                                        Text {
+                                            text: root.ledStats[3];
+                                        }
+                                        Text {
+                                            text: root.ledStats[4];
+                                        }
+                                        Text {
+                                            text: root.ledStats[5];
+                                        }
+                                        Text {
+                                            text: root.ledStats[6];
+                                        }
+                                        Text {
+                                            text: root.ledStats[7];
+                                        }
+                                        Text {
+                                            text: root.ledStats[8];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    GroupBox {
+                        title: "PCBA Information";
+                        GridLayout {
+                            spacing: 2px;
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Serial Number: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.SerialNumber;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "PCBA Serial Number: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.PCBASerNo;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "FW Version: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.FWVersion;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "HW Version ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.HWVersion;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Supplier UID: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.SuppplierUid;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Manufacturer Name: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.Manufacturer;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Manufacturing Date: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.ManuDate;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "PCBA SW Parameter Version: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.PcbaSwParamVersion;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    horizontal-alignment: right;
+                                    text: "Protocol Version: ";
+                                }
+
+                                Text {
+                                    horizontal-alignment: left;
+                                    text: root.hmiProtocolVersion;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Tab {
+            title: "About";
+            VerticalLayout {
+                alignment: start;
+                HorizontalLayout {
+                    alignment: center;
+                    GroupBox {
+                        width: parent.width * 0.8;
+                        GridLayout {
+                            spacing: 4px;
+                            Row {
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: right;
+                                    font-weight: 900;
+                                    text: "Version:";
+                                }
+
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: left;
+                                    text: root.Version;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: right;
+                                    font-weight: 900;
+                                    text: "Protocol-Version:";
+                                }
+
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: left;
+                                    text: root.ProtocolVersion;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: right;
+                                    font-weight: 900;
+                                    text: "Author:";
+                                }
+
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: left;
+                                    text: root.Author;
+                                }
+                            }
+
+                            Row {
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: right;
+                                    font-weight: 900;
+                                    text: "ArticleNumber:";
+                                }
+
+                                Text {
+                                    height: 25px;
+                                    horizontal-alignment: left;
+                                    text: root.AppPartNo;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                AboutSlint {
+
+                    height: 20px;
+                }
+            }
+        }
+    }
+}

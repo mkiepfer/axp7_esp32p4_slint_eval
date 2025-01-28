@@ -1,0 +1,100 @@
+import { VerticalBox } from "std-widgets.slint";
+
+export component WpdSlider inherits Rectangle {
+    in-out property<float> maximum: 100;
+    in-out property<float> minimum: 0;
+    in-out property<float> value-x;
+    in-out property<float> value-y;
+
+    callback x-changed(float);
+    callback y-changed(float);
+
+    min-height: 100px;
+    min-width: 100px;
+
+    Rectangle {
+        width: parent.height;
+        height: 5px;
+        border-radius: self.height/2;
+        background: #454545;
+        border-width: 1px;
+        border-color: root.background.darker(25%);
+    }
+
+    Rectangle {
+        width: 5px;
+        height: parent.height;
+        border-radius: self.width/2;
+        background: #454545;
+        border-width: 1px;
+        border-color: root.background.darker(25%);
+    }
+
+    handle := Rectangle {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+        border-radius: self.width / 2;
+        background: touch.pressed ? #D2D208: touch.has-hover ? #D2D208 : #F8FF02;
+        border-color: self.background.darker(15%);
+        y: (root.height - handle.width) * (root.value-y - root.minimum)/(root.maximum - root.minimum);
+        x: (root.width - handle.height) * (root.value-x - root.minimum)/(root.maximum - root.minimum);
+    }
+    touch := TouchArea {
+        property <float> pressed-value-y;
+        property <float> pressed-value-x;
+        property <bool> lock-x: false;
+        property <bool> lock-y: false;
+
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                self.pressed-value-y = root.value-y;
+                self.pressed-value-x = root.value-x;
+            }
+        }
+        moved => {
+            if (self.enabled && self.pressed) {
+
+                if(!self.lock_y) {
+                    root.value-y = max(root.minimum, min(root.maximum,
+                        self.pressed-value-y + (touch.mouse-y - touch.pressed-y) * (root.maximum - root.minimum) / (root.height - handle.height)));
+                }
+
+                if(!self.lock_x) {
+                    root.value-x = max(root.minimum, min(root.maximum,
+                        self.pressed-value-x + (touch.mouse-x - touch.pressed-x) * (root.maximum - root.minimum) / (root.height - handle.height)));
+                }
+
+                y-changed(root.value-y);
+
+            }
+
+            if((abs(root.value-x - 50) > 2)) {
+                self.lock-y = true;
+                root.value-y = 50;
+            }
+            else if((abs(root.value-y - 50) > 2)) {
+                self.lock-x = true;
+                root.value-x = 50;
+            }
+            else {
+                self.lock-x = false;
+                self.lock-y = false;
+            }
+        }
+    }
+}
+
+/*
+export component Recipe inherits Window {
+    VerticalBox {
+        alignment: start;
+        slider := WpdSlider {
+            maximum: 100;
+        }
+        Text {
+            text: "Value: \{round(slider.value)}";
+        }
+    }
+}
+*/
