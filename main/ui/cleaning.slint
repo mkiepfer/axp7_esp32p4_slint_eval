@@ -1,0 +1,61 @@
+import { VerticalBox, AboutSlint, Button } from "std-widgets.slint";
+import "./fonts/clanpro_bold.ttf";
+
+export component CleaningScreen inherits Rectangle {
+    callback switchScreen;
+
+    background: rgb(0, 0, 0);
+    width: 1024px;
+    height: 600px;
+    Image {
+        source: @image-url("./images/navigation_arrow.png");
+        x: 30px;
+        y: 45px;
+    }
+
+    Text {
+        text: "2/8";
+        font-family: "Clan Pro";
+        font-size: 24px;
+        x: 710px;
+        y: 500px;
+        color: rgb(255, 255, 255);
+    }
+
+    Text {
+        text: "Repeat it on the other side";
+        font-family: "Clan Pro";
+        font-size: 32px;
+        x: 490px;
+        y: 180px;
+        color: rgb(255, 255, 255);
+    }
+
+    Image {
+        source: @image-url("./images/device_filter.png");
+        //width: 959px;
+        //height: 719px;
+        x: 100px;
+        y: 200px;
+    }
+
+    Text {
+        text: "CLEANING COUNTER ELECTRODE";
+        font-family: "Clan Pro";
+        font-size: 32px;
+        x: 80px;
+        y: 50px;
+        color: rgb(255, 255, 255);
+    }
+
+    Image {
+        source: @image-url("./images/button_active.png");
+        x: 480px;
+        y: 476px;
+    }
+    Image {
+        source: @image-url("./images/button_default.png");
+        x: 900px;
+        y: 476px;
+    }
+}

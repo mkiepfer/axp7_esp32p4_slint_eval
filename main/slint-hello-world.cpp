@@ -11,7 +11,7 @@
 #    define DRAW_BUF_SIZE (BSP_LCD_H_RES * CONFIG_BSP_LCD_DRAW_BUF_HEIGHT)
 #endif
 
-#include "app-window.h"
+#include "axp7_window.h"
 
 extern "C" void app_main(void)
 {

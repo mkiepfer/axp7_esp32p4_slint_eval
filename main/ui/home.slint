@@ -1,0 +1,84 @@
+import { VerticalBox, AboutSlint, Button } from "std-widgets.slint";
+import "./fonts/clanpro_bold.ttf";
+
+export component HomeScreen inherits Rectangle {
+    callback switchScreen;
+
+    background: rgb(0, 0, 0);
+    width: 1024px;
+    height: 600px;
+    Image {
+        source: @image-url("./images/button_hamburger.png");
+        width: 94px;
+        height: 94px;
+        x: 877px;
+        y: 342px;
+    }
+
+    Rectangle {
+        width: 94px;
+        height: 94px;
+        x: 877px;
+        y: 450px;
+        Image {
+            source: @image-url("./images/button_settings.png");
+            width: 94px;
+            height: 94px;
+        }
+        TouchArea {
+            clicked => {
+                root.switchScreen();
+            }
+        }
+    }
+
+    Image {
+        source: @image-url("./images/air_quality_sym.png");
+        height: 22px;
+        x: 94px;
+        y: 270px;
+    }
+
+    Image {
+        source: @image-url("./images/air_quality_slider.png");
+        x: 94px;
+        y: 486px;
+    }
+
+    Image {
+        source: @image-url("./images/air_quality_bg.png");
+        //width: 959px;
+        //height: 719px;
+        x: 371px;
+        y: -60px;
+    }
+
+    Text {
+        text: "AIR QUALITY";
+        font-family: "Clan Pro";
+        font-size: 32px;
+        x: 150px;
+        y: 263px;
+        color: rgb(255, 255, 255);
+    }
+
+    Text {
+        text: "GOOD";
+        font-family: "Clan Pro";
+        font-size: 80px;
+        x: 94px;
+        y: 345px;
+        color: rgb(255, 255, 255);
+    }
+
+    Image {
+        source: @image-url("./images/air_quality_knob.png");
+        x: 94px;
+        y: 456px;
+        animate x {
+            duration: 2s;
+            iteration-count: -1;
+            easing: ease-in-out;
+        }
+    }
+}

@@ -4,4 +4,4 @@ idf_component_register(
     REQUIRES slint
 )
 
-slint_target_sources(${COMPONENT_LIB} ui/app-window.slint)
+slint_target_sources(${COMPONENT_LIB} ui/axp7_window.slint)
