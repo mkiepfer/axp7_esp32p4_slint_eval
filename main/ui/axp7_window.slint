@@ -4,24 +4,35 @@ import { CleaningScreen } from "cleaning.slint";
 
 export component AppWindow inherits Window {
     title: "AXP7 Showcase";
+    width:1024px;
+    height: 600px;
 
-    TabWidget {
-        //width: 1024px;
-        //height: 600px;
-
-        Tab {
-            home := HomeScreen {
-                width: 1024px;
-                height: 600px;
-            }
+    home := HomeScreen {
+        switchScreen => {
+            home.x = 1024px;
+            cleaning.x = 0px;
         }
+        width: 1024px;
+        height: 600px;
+        visible: true;
+        animate x {
+            duration: 10s;
+            easing: ease-in;
+        }
+    }
 
-        Tab {
-            cleaning := CleaningScreen {
-                width: 1024px;
-                height: 600px;
-                //x:1024px;
-            }
+    cleaning := CleaningScreen {
+        switchScreen => {
+            home.x = 0px;
+            cleaning.x = -1024px;
+        }
+        width: 1024px;
+        height: 600px;
+        x: -1024px;
+        visible: true;
+        animate x {
+            duration: 10s;
+            easing: ease-in;
         }
     }
 }

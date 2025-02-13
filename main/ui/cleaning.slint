@@ -53,9 +53,22 @@ export component CleaningScreen inherits Rectangle {
         x: 480px;
         y: 476px;
     }
-    Image {
-        source: @image-url("./images/button_default.png");
+
+    Rectangle {
+        width: 94px;
+        height: 94px;
         x: 900px;
         y: 476px;
+        Image {
+            source: @image-url("./images/button_default.png");
+
+        }
+        TouchArea {
+            clicked => {
+                root.switchScreen();
+            }
+        }
     }
+
+
 }
